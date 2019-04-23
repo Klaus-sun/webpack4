@@ -1,0 +1,10 @@
+
+body{
+    background: #885bd2
+}
+body div {
+  width: 100px;
+  background: yellow;
+  border: 3px solid seagreen;
+}
+
