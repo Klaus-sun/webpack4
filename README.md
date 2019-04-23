@@ -316,3 +316,5 @@ optimization: {
     minimizer: [new OptimizeCSSAssetsPlugin({}),new UglifyJsPlugin()]
   }
 ````
+
+[demo](https://github.com/Klaus-sun/webpack4/tree/master/demo)
