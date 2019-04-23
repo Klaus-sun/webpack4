@@ -311,9 +311,8 @@ $ npm install uglifyjs-webpack-plugin --save-dev
 * [配置产考链接](https://www.npmjs.com/package/uglifyjs-webpack-plugin)
 ````JavaScript
 const OptimizeCSSAssetsPlugin = require("optimize-css-assets-webpack-plugin"); //压缩js
-//配置文件中添加优化项
+//配置文件中添加优化项1
 optimization: {
     minimizer: [new OptimizeCSSAssetsPlugin({}),new UglifyJsPlugin()]
   }
 ````
-aa
