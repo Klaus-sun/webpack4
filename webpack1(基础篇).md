@@ -316,4 +316,135 @@ optimization: {
     minimizer: [new OptimizeCSSAssetsPlugin({}),new UglifyJsPlugin()]
   }
 ````
-[demo](https://github.com/Klaus-sun/webpack4/tree/master/demo)
+### 语法的转换 babel
+在index.js 里写点es6语法箭头函数
+````JavaScript
+let fn = () => {
+  console.log("es6 webpack");
+};
+fn();
+````
+终端执行: npx webpack 查看打包文件
+![es6](https://leapfe.oss-cn-beijing.aliyuncs.com/klaus/webpack/img/es6.png)
+* --我们发现打包出来的仍然是es6语法这个时候我们需要一个loader 进行转换 babel-loader babel @babel/core
+(babel/core是@babel-loader的核心组件转化模块@babel/preset-env) [参考链接](https://www.npmjs.com/package/babel-preset-env)
+终端运行:npm i -d babel-loader babel @babel/core @babel/preset-env
+在module添加配置
+````JavaScript
+ //在rules下添加配置
+ {
+        test: /\.js$/,
+        use: [
+          {
+            loader: "babel-loader",
+            options: {
+              //转化es5语法--presets预设
+              presets: ["@babel/preset-env"]
+            }
+          }
+        ]
+      },
+````
+终端运行:npm run build
+![ws62](https://leapfe.oss-cn-beijing.aliyuncs.com/klaus/webpack/img/es62.png)
+* 发现可以已经转换es6语法 但是仅仅这样不能转换es6高阶语法比如一些特殊的类函数
+````JavaScript
+class Test {
+  // new Test() a =1 实例上添加a属性 这个语法属于es7语法打包时发现并不能解析
+  a = 1;
+}
+````
+终端运行:npm run build 发现报错提示安装 @babel/plugin-proposal-class-properties 
+![errbabel](https://leapfe.oss-cn-beijing.aliyuncs.com/klaus/webpack/img/errbabel.png)
+那我们按照要求按照一下插件 npm i -d @babel/plugin-proposal-class-properties 并进行一次配置
+````JavaScript
+ //在rules下添加配置
+ {
+        test: /\.js$/,
+        use: [
+          {
+            loader: "babel-loader",
+            options: {
+              //转化es5语法--presets预设
+              presets: ["@babel/preset-env"],
+               plugins: ["@babel/plugin-proposal-class-properties"]
+            }
+          }
+        ]
+      },
+````
+还有一种写法 装饰器@Log打包也是不被解析的 在js 添加
+![@err](https://leapfe.oss-cn-beijing.aliyuncs.com/klaus/webpack/img/%40err.png)
+按照错误提示安装decorators-legacy [参考链接](https://babeljs.io/docs/en/babel-plugin-proposal-decorators) 安装官方给出配置添加
+
+````JavaScript
+ //在rules下添加配置
+ {
+        test: /\.js$/,
+        use: {
+          {
+            loader: "babel-loader",
+            options: {
+              //转化es5语法--presets预设
+              presets: ["@babel/preset-env"],
+               plugins: [ //这里要注意添加顺序
+                 ["@babel/plugin-proposal-decorators", { legacy: true }],
+                ["@babel/plugin-proposal-class-properties", { loose: true }]]
+            }
+          }
+    
+      },
+````
+转化完语法接下来看一下babel语法的校验 @babel/plugin-transform-runtime @babel/runtime[参考链接](https://babeljs.io/docs/en/babel-plugin-transform-runtime#docsNav)
+
+````JavaScript
+  {
+        test: /\.js$/,
+        use: {
+          loader: "babel-loader",
+          options: {
+            //转化es5语法--presets预设
+            presets: ["@babel/preset-env"],
+            plugins: [
+              ["@babel/plugin-proposal-decorators", { legacy: true }],
+              ["@babel/plugin-proposal-class-properties", { loose: true }],
+              [
+                "@babel/plugin-transform-runtime",
+                {
+                  absoluteRuntime: false,
+                  corejs: false,
+                  helpers: true,
+                  regenerator: true,
+                  useESModules: false
+                }
+              ]
+            ]
+          }
+        },
+        include: path.resolve(__dirname, "src"), //只找__dirname - >src
+        exclude: /node_modules/ //忽略node_modulse
+      },
+````
+* includes 实例方法不被解析 需要一个补丁模块@babel/polyfill
+npm install --save @babel/polyfill
+Babel includes a polyfill that includes a custom regenerator runtime and core-js.
+使用可以直接在js 里引入即可。
+* 接下来看一下代码校验ESLint代码校验工具[参考链接](https://cn.eslint.org/)
+终端安装 npm i -d eslint eslint-loader
+根据项目需求下载对应的eslintrc.json [下载链接](https://eslint.org/demo/)
+````JavaScript
+ //代码校验eslint
+      {
+        test: /\.js$/,
+        use: {
+          loader: "eslint-loader",
+          options: {
+            enforce: "pre" //强制执行顺序
+          }
+        }
+      },
+````
+
+* [DEMO](https://github.com/Klaus-sun/webpack4/tree/master/demo)
+* 本文回顾 1、webpack基本功能 build.js 打包的原理及源码分析 2、webpack基础配置及常用插件配置安装 3、loader的使用与配置样式的处理 4、webpack优化项的简单使用  5、babel语法转换与使用 babel语法校验 . 完成以上我相信大家可以掌握并搭建简单webpack项目。
+* *第二章我们将讲解webpack 其他组件的配置及webpack优化项 webpack图片处理 多入口应用）

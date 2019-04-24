@@ -44,6 +44,42 @@ module.exports = {
   module: {
     //添加模块模块是对象
     rules: [
+      //代码校验eslint
+      {
+        test: /\.js$/,
+        use: {
+          loader: "eslint-loader",
+          options: {
+            enforce: "pre" //强制执行顺序
+          }
+        }
+      },
+      {
+        test: /\.js$/,
+        use: {
+          loader: "babel-loader",
+          options: {
+            //转化es5语法--presets预设
+            presets: ["@babel/preset-env"],
+            plugins: [
+              ["@babel/plugin-proposal-decorators", { legacy: true }],
+              ["@babel/plugin-proposal-class-properties", { loose: true }],
+              [
+                "@babel/plugin-transform-runtime",
+                {
+                  absoluteRuntime: false,
+                  corejs: false,
+                  helpers: true,
+                  regenerator: true,
+                  useESModules: false
+                }
+              ]
+            ]
+          }
+        },
+        include: path.resolve(__dirname, "src"),
+        exclude: /node_modules/
+      },
       //规则 css-loader主要解析我们样式中@import语法
       {
         test: /\.css$/,
